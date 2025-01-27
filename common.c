@@ -74,7 +74,8 @@ int viva_epoll_init(int sock)
 int viva_wait_epoll_events(int lfd, int epfd, struct epoll_event *events, int max_events, int timeout)
 {
     int evnum = epoll_wait(epfd, events, max_events, timeout);
-    IF(evnum == -1, "epoll_wait", close(lfd); close(epfd); return -1);
+    IF(evnum == -1, "epoll_wait", return -1);
+    // IF(evnum == -1, "epoll_wait", close(lfd); close(epfd); return -1);
     return evnum;
 }
 

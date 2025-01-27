@@ -1,12 +1,24 @@
 module main
 
-@[unsafe]
+struct MyServer {
+}
+
 fn main() {
+	unsafe {
+		start[MyServer](8080)
+	}
+}
+
+@[unsafe]
+fn start[T](port int) {
 	listenfd := C.viva_listen(8080)
 	epfd := C.viva_epoll_init(listenfd)
 	events := [max_events]C.epoll_event{}
 	for {
 		evnum := C.viva_wait_epoll_events(listenfd, epfd, &events[0], max_events, -1)
+		if evnum == -1 {
+			continue
+		}
 		for i := 0; i < evnum; i++ {
 			fd := events[i].data.fd
 
@@ -21,22 +33,35 @@ fn main() {
 }
 
 fn handle_client(listenfd int, epfd int, clientfd int) ! {
-	buffer, count := fd_read(clientfd, buffer_size)
-	if count == -1 {
-		if C.errno != C.EAGAIN {
-			C.close(clientfd)
-			eprintln('read ${C.errno}')
-			return error('read ${C.errno}')
-		} else {
-			eprintln('read')
-			return error('read')
-		}
-	} else if count == 0 {
-		trace('Connection closed on fd ${clientfd}')
-		C.close(clientfd)
-	} else {
-		handle_response(epfd, clientfd, buffer, count)
-	}
+	ctx := C.SSL_CTX_new(C.TLS_server_method())
+	ssl := C.SSL_new(ctx)
+	C.SSL_set_fd(ssl, clientfd)
+	C.SSL_use_certificate_chain_file(ssl, &char(certf.str))
+	C.SSL_use_PrivateKey_file(ssl, &char(keyf.str), C.SSL_FILETYPE_PEM)
+	C.SSL_accept(ssl)
+	buffer := []u8{cap: 1024}
+	C.SSL_read(ssl, &buffer, 1023)
+
+	println(buffer)
+	response := 'HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\nHello world'
+	C.SSL_write(ssl, response.str, 1024)
+	C.SSL_shutdown(ssl)
+	// buffer, count := fd_read(clientfd, buffer_size)
+	// if count == -1 {
+	// 	if C.errno != C.EAGAIN {
+	// 		C.close(clientfd)
+	// 		eprintln('read ${C.errno}')
+	// 		return error('read ${C.errno}')
+	// 	} else {
+	// 		eprintln('read')
+	// 		return error('read')
+	// 	}
+	// } else if count == 0 {
+	// 	trace('Connection closed on fd ${clientfd}')
+	// 	C.close(clientfd)
+	// } else {
+	// 	handle_response(epfd, clientfd, buffer, count)
+	// }
 }
 
 fn handle_incom(listenfd int, epfd int) ! {
@@ -67,27 +92,27 @@ fn handle_response(epfd int, clientfd int, buffer string, count int) {
 		fd:   clientfd
 	}
 
-	index_page := 'HTTP/1.1 200 OK
-Content-Type: text/html; charset=UTF-8
-Cache-Control: no-cache
-Connection: keep-alive
+	// 	index_page := 'HTTP/1.1 200 OK
+	// Content-Type: text/event-stream; charset=UTF-8
+	// Cache-Control: no-cache
+	// Connection: keep-alive
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple HTTP Response</title>
-</head>
-<body>
-    <h1>Hello, World!</h1>
-    <p>This is a simple HTML response.</p>
-    <p>Your request was: </p>
-    <pre>${buffer}</pre>
-</body>
-</html>'
+	// <!DOCTYPE html>
+	// <html lang="en">
+	// <head>
+	//     <meta charset="UTF-8">
+	//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	//     <title>Simple HTTP Response</title>
+	// </head>
+	// <body>
+	//     <h1>Hello, World!</h1>
+	//     <p>This is a simple HTML response.</p>
+	//     <p>Your request was: </p>
+	//     <pre>${buffer}</pre>
+	// </body>
+	// </html>'
 
-	response.write(index_page)
+	// 	response.write(index_page)
 	// response.make_sse()	
 	// response.write('data: hello\n\n')
 	// println('${response.buf_start}  ${response.buf - response.buf_start}  ${index_page.len}')

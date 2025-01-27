@@ -2,6 +2,7 @@
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <openssl/ssl.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
