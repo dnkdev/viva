@@ -1,4 +1,8 @@
 viva v0.0.1
 
-viva is a simple, straightforward web server, for V programming language. Made
-for educational purposes. Uses `epoll` under the hood.
+viva is a simple, straightforward web server to handle HTTP/1.1, for V
+programming language. Made for educational purpose.
+
+Non-blocking. 
+Uses `epoll` under the hood. 
+Manual request parsing - the request string is in `Response` struct. Library parses only the first line of the request with method and path to include V's attributes to use.

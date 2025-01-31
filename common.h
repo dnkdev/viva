@@ -15,5 +15,3 @@
         perror(msg);        \
         then_do;            \
     }
-
-#define MAX_EVENTS 1024

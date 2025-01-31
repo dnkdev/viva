@@ -9,6 +9,7 @@ int viva_listen(int port)
         "socket",
         exit(1));
 
+    // Removing 'Address already in use'
     int opt = 1;
     IF(
         setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0,
@@ -35,6 +36,7 @@ int viva_listen(int port)
     printf("Listening on port %d...\n", port);
     return sock;
 }
+
 int epoll_del_event(int epfd, int sock)
 {
     IF(
@@ -79,17 +81,6 @@ int viva_wait_epoll_events(int lfd, int epfd, struct epoll_event *events, int ma
     return evnum;
 }
 
-// void viva_loop(int lfd, int epfd)
-// {
-//     struct epoll_event events[MAX_EVENTS];
-//     while (1)
-//     {
-//         int evnum = viva_wait_epoll_events(lfd, epfd, &events[0], MAX_EVENTS, -1);
-//         for (int i; i < evnum; i++)
-//         {
-//         }
-//     }
-// }
 int viva_make_socket_non_blocking(int fd)
 {
     int flags = fcntl(fd, F_GETFL, 0);
@@ -107,6 +98,7 @@ int viva_make_socket_non_blocking(int fd)
     }
     return 0;
 }
+
 int viva_accept_new_incom(int lsock)
 {
     struct sockaddr_in client_addr;
@@ -125,11 +117,3 @@ int viva_accept_new_incom(int lsock)
     }
     return client_sock;
 }
-// int main()
-// {
-//     int listenfd = viva_listen(8080);
-
-//     int epfd = viva_epoll_init(listenfd);
-
-//     viva_loop(listenfd, epfd);
-// }

@@ -1,4 +1,4 @@
-module main
+module viva
 
 #include "@VMODROOT/common.h"
 #flag "@VMODROOT/common.c"
@@ -54,6 +54,7 @@ fn fd_read(fd int, maxbytes int) (string, int) {
 		buf[nbytes] = 0
 		return tos(buf, nbytes), nbytes
 	}
+
 }
 
 fn fd_write(fd int, s string) {
@@ -71,8 +72,11 @@ fn fd_write(fd int, s string) {
 }
 
 pub struct Response {
+	header map[string]string
+pub:
 	epfd int // epoll file descriptor, used in end()
 	fd   int // client file descriptor
+	request string
 }
 
 // directly writes to file descriptor
