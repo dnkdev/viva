@@ -70,7 +70,7 @@ fn handle_response[T](app T, epfd int, clientfd int, buffer string, count int) {
 		fd: clientfd,
 		request: buffer
 	}
-    println('${method_path}')
+   	trace('${method_path}')
 	$for method in T.methods {
         if method_path in method.attrs {
             app.$method(response)

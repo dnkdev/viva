@@ -3,7 +3,7 @@ deps := common.c
 cc := gcc
 
 run: 
-	v -d trace -o $(exe) crun .
+	v -d trace -o $(exe) crun examples/simple.v
 
 crun: cbuild
 	./$(exe)
