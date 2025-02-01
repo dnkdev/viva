@@ -2,8 +2,6 @@ module viva
 
 #include "@VMODROOT/common.h"
 #flag "@VMODROOT/common.c"
-#flag -lssl
-//-lcrypto
 
 const max_events = 1024
 const buffer_size = 8096
