@@ -24,6 +24,20 @@ pub fn start[T](app T, port int) {
 	}
 }
 
+fn handle_incom(listenfd int, epfd int) ! {
+	client_sock := C.viva_accept_new_incom(listenfd)
+	if client_sock == -1 {
+		return error('viva_accept_new_incom')
+	}
+
+	// mut client_event :=
+	if C.epoll_add_event(epfd, client_sock, u32(C.EPOLLIN | C.EPOLLET | C.EPOLLRDHUP)) == -1 {
+		C.close(client_sock)
+		return error('epoll_add_event')
+	}
+	trace('New connection on fd ${client_sock}')
+}
+
 fn handle_client[T](app T, listenfd int, epfd int, clientfd int) ! {
 	buffer, count := fd_read(clientfd, buffer_size)
 	if count == -1 {
@@ -43,55 +57,26 @@ fn handle_client[T](app T, listenfd int, epfd int, clientfd int) ! {
 	}
 }
 
-fn handle_incom(listenfd int, epfd int) ! {
-	client_sock := C.viva_accept_new_incom(listenfd)
-	if client_sock == -1 {
-		return error('viva_accept_new_incom')
-	}
-
-	// mut client_event :=
-	if C.epoll_add_event(epfd, client_sock, u32(C.EPOLLIN | C.EPOLLET | C.EPOLLRDHUP)) == -1 {
-		C.close(client_sock)
-		return error('epoll_add_event')
-	}
-	trace('New connection on fd ${client_sock}')
-}
-
-@[if trace ?]
-pub fn trace(s string) {
-	println(s)
-}
-
 fn handle_response[T](app T, epfd int, clientfd int, buffer string, count int) {
 	// gmt := time.utc()
 	// date := gmt.http_header_string()
 	// mut buff := ''
-	
-    // line := 
-    // method := line.all_before(' ')
-    // path := line.all_before_last(' ').all_after(' ')
+
+	// get first line with method and path
     method_path := buffer.all_before('\n').all_before(' HTTP/1.')
     
+	response := Response {
+		epfd: epfd,
+		fd: clientfd,
+		request: buffer
+	}
     println('${method_path}')
 	$for method in T.methods {
         if method_path in method.attrs {
             app.$method(response)
+			return
         }
-        // println(method)
-		// $for param in m.params {
-		// 	println(typeof(param.typ).name)
-		// }
 	}
 	
-
-	// 	response.write(index_page)
-	// response.make_sse()	
-	// response.write('data: hello\n\n')
-	// println('${response.buf_start}  ${response.buf - response.buf_start}  ${index_page.len}')
-	// v_sprintf("%.*s", response.buf - response.buf_start, response.buf_start)
-	// println(tos(response.buf, response.buf - response.buf_start))
-	// fd_write(fd, index_page)
-
-	trace('Sent response to fd ${clientfd}')
 	response.end()
 }

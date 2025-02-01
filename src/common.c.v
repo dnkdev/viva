@@ -43,6 +43,11 @@ pub fn epoll_close_conn(epfd int, fd int) {
 	C.close(fd)
 }
 
+@[if trace ?]
+pub fn trace(s string) {
+	println(s)
+}
+
 fn fd_read(fd int, maxbytes int) (string, int) {
 	unsafe {
 		mut buf := malloc_noscan(maxbytes + 1)
@@ -52,9 +57,9 @@ fn fd_read(fd int, maxbytes int) (string, int) {
 			return '', nbytes
 		}
 		buf[nbytes] = 0
+	    trace('Got ${nbytes} bytes on fd ${fd}')
 		return tos(buf, nbytes), nbytes
 	}
-
 }
 
 fn fd_write(fd int, s string) {
@@ -69,6 +74,8 @@ fn fd_write(fd int, s string) {
 		remaining = remaining - written
 		sp = unsafe { voidptr(sp + written) }
 	}
+
+	trace('Sent ${s.len} bytes to fd ${fd}')
 }
 
 pub struct Response {
@@ -81,11 +88,11 @@ pub:
 
 // directly writes to file descriptor
 @[inline]
-pub fn (mut r Response) write(s string) {
+pub fn (r Response) write(s string) {
 	fd_write(r.fd, s)
 }
 
-pub fn (mut r Response) end() {
+pub fn (r Response) end() {
 	if C.shutdown(r.fd, C.SHUT_WR) == -1 {
 		eprintln('shutdown')
 	}
