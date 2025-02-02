@@ -2,7 +2,7 @@ module viva
 
 pub fn start[T](app T, port int) {
 	unsafe {
-		listenfd := C.viva_listen(8080)
+		listenfd := C.viva_listen(port)
 		epfd := C.viva_epoll_init(listenfd)
 		events := [max_events]C.epoll_event{}
 		for {

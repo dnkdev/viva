@@ -77,7 +77,6 @@ fn fd_write(fd int, s string) {
 }
 
 pub struct Response {
-	header map[string]string
 pub:
 	epfd int // epoll file descriptor, used in end()
 	fd   int // client file descriptor
