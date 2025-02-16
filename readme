@@ -1,7 +1,7 @@
 viva v0.0.1
 
 viva is a simple, straightforward web server to handle HTTP/1.0, for V
-programming language. Made for educational purposes
+programming language. Made for educational purposes.
 
 Non-blocking. 
 Uses `epoll` under the hood. 

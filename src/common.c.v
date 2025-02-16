@@ -55,7 +55,7 @@ fn fd_read(fd int, maxbytes int) (string, int) {
 			return '', nbytes
 		}
 		buf[nbytes] = 0
-	    trace('Got ${nbytes} bytes on fd ${fd}')
+		trace('Got ${nbytes} bytes on fd ${fd}')
 		return tos(buf, nbytes), nbytes
 	}
 }
@@ -78,8 +78,8 @@ fn fd_write(fd int, s string) {
 
 pub struct Response {
 pub:
-	epfd int // epoll file descriptor, used in end()
-	fd   int // client file descriptor
+	epfd    int // epoll file descriptor, used in end()
+	fd      int // client file descriptor
 	request string
 }
 

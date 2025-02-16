@@ -15,9 +15,15 @@ pub fn start[T](app T, port int) {
 				fd := events[i].data.fd
 
 				if fd == listenfd {
-					handle_incom(listenfd, epfd) or { continue }
+					handle_incom(listenfd, epfd) or {
+						eprintln(err)
+						continue
+					}
 				} else if events[i].events == C.EPOLLIN {
-					handle_client[T](app, listenfd, epfd, fd) or { continue }
+					handle_client[T](app, listenfd, epfd, fd) or {
+						eprintln(err)
+						continue
+					}
 				}
 			}
 		}
@@ -63,20 +69,19 @@ fn handle_response[T](app T, epfd int, clientfd int, buffer string, count int) {
 	// mut buff := ''
 
 	// get first line with method and path
-    method_path := buffer.all_before('\n').all_before(' HTTP/1.')
-    
-	response := Response {
-		epfd: epfd,
-		fd: clientfd,
+	method_path := buffer.all_before('\n').all_before(' HTTP/1.')
+
+	response := Response{
+		epfd:    epfd
+		fd:      clientfd
 		request: buffer
 	}
-   	trace('${method_path}')
+	trace('${method_path}')
 	$for method in T.methods {
-        if method_path in method.attrs {
-            app.$method(response)
+		if method_path in method.attrs {
+			app.$method(response)
 			return
-        }
+		}
 	}
-	
 	response.end()
 }

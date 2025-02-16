@@ -1,14 +1,12 @@
 module main
 
-import viva { start Response }
-
+import viva { Response, start }
 
 struct MyServer {
 }
 
 @['GET /']
 fn (s MyServer) index(res Response) {
-
 	index_page := 'HTTP/1.1 200 OK
 	Content-Type: text/html; charset=UTF-8
 	Cache-Control: no-cache
@@ -29,11 +27,11 @@ fn (s MyServer) index(res Response) {
 	</body>
 	</html>'
 
-    res.write(index_page)
-    res.end()
+	res.write(index_page)
+	res.end()
 }
 
 fn main() {
-    mut app := MyServer{}
+	mut app := MyServer{}
 	start(app, 8080)
 }
